@@ -6,14 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedTrakr</title>
     <style>
+        :root {
+            --gray5: #555;
+            --lineBorder: 1.5px solid var(--gray5);
+            --shadow: 5px 5px 0 0 var(--gray5);
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: sans-serif;
+            color: var(--gray5);
         }
 
         h1 {
             text-align: center;
+        }
+
+        .noTopMarg {
+            margin-top: 0;
         }
 
         #medLog {
@@ -24,10 +35,25 @@
                 display: grid;
                 grid-column: span 3;
                 grid-template-columns: subgrid;
-                padding: 1rem;
+                padding: 0.15rem 1rem;
                 background-color: aliceblue;
                 margin: 0.5rem 1rem;
                 border-radius: 36px;
+                border: var(--lineBorder);
+                box-shadow: var(--shadow);
+                align-items: center;
+            }
+        }
+
+        .medLogDelete {
+            button {
+                width: 40px;
+                aspect-ratio: 1;
+                border-radius: 50%;
+                border: var(--lineBorder);
+                font-size: 1.25rem;
+                font-weight: 700;
+                background-color: transparent;
             }
         }
 
@@ -37,16 +63,35 @@
             cursor: pointer;
         }
 
+        #newEntryBtn {
+            position: fixed;
+            inset: auto auto 10dvh auto;
+            border: var(--lineBorder);
+            box-shadow: var(--shadow);
+            font-size: 36px;
+            background-color: transparent;
+            aspect-ratio: 1;
+            width: 80px;
+            border-radius: 50%;
+            margin-left: 50%;
+            translate: -50% 0;
+        }
+
         #newEntryModal {
-            position: relative;
-            border: 1px solid black;
+            position: fixed;
+            inset: auto 3dvw 3dvh 3dvw;
+            background-color: aliceblue;
+            border-radius: 1.5rem;
+            border: var(--lineBorder);
+            box-shadow: var(--shadow);
             padding: 2rem;
         }
 
         #closeModal {
             position: absolute;
-            padding: 1rem;
+            padding: 1.5rem;
             inset: 0 0 auto auto;
+            font-size: 24px;
         }
     </style>
 </head>
@@ -98,7 +143,7 @@
     <div id="newEntryModal" hidden>
         <div id="closeModal">&#10006;</div>
         <div id="newEntryForm">
-            <h2>Add a new med</h2>
+            <h2 class="noTopMarg">Add a new med</h2>
             <form action="">
                 <label for="medName">Medication Name?</label><input type="text" name="medName" id="medName" placeholder="Albuterol"><br>
                 <label for="medTime">How Often?</label><input type="range" name="medTime" id="medTime" min="1" max="8"><br>
