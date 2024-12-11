@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrakr</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #medLog {
+            display: grid;
+            grid-template-columns: 1fr 1fr 60px;
+
+            .logLine {
+                display: grid;
+                grid-column: span 3;
+                grid-template-columns: subgrid;
+                padding: 1rem;
+                background-color: aliceblue;
+                margin: 0.5rem 1rem;
+                border-radius: 36px;
+            }
+        }
+
+        button,
+        input[type="submit"],
+        #closeModal {
+            cursor: pointer;
+        }
+
+        #newEntryModal {
+            position: relative;
+            border: 1px solid black;
+            padding: 2rem;
+        }
+
+        #closeModal {
+            position: absolute;
+            padding: 1rem;
+            inset: 0 0 auto auto;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>MedTrakr</h1>
+    </header>
+    <section>
+        <div id="medLog">
+            <div class="logLine">
+                <div class="medLogName">
+                    Ibuprofen
+                </div>
+                <div class="medLogTime">
+                    6a
+                </div>
+                <div class="medLogDelete">
+                    <button>&#128465;</button>
+                </div>
+            </div>
+            <div class="logLine">
+                <div class="medLogName">
+                    Acetominophen
+                </div>
+                <div class="medLogTime">
+                    7a
+                </div>
+                <div class="medLogDelete">
+                    <button>&#128465;</button>
+                </div>
+            </div>
+            <div class="logLine">
+                <div class="medLogName">
+                    Albuterol
+                </div>
+                <div class="medLogTime">
+                    7:30a
+                </div>
+                <div class="medLogDelete">
+                    <button>&#128465;</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <button id="newEntryBtn">+</button>
+    </section>
+    <div id="newEntryModal" hidden>
+        <div id="closeModal">&#10006;</div>
+        <div id="newEntryForm">
+            <h2>Add a new med</h2>
+            <form action="">
+                <label for="medName">Medication Name?</label><input type="text" name="medName" id="medName" placeholder="Albuterol"><br>
+                <label for="medTime">How Often?</label><input type="range" name="medTime" id="medTime" min="1" max="8"><br>
+                <label for="medAmount">How Many?</label><input type="number" name="medAmount" id="medAmount" min="200" max="800" step="100" value="200">
+                <input type="submit">
+            </form>
+        </div>
+        <div class="currentMeds">
+            <h2>Current meds</h2>
+            <button id="med1">Ibuprofen</button>
+            <button id="med2">Acetominophen</button>
+            <button id="med3">Albuterol</button>
+        </div>
+    </div>
+</body>
+
+<script>
+    // Initialize an empty array to store medication entries
+    let medEntries = [];
+
+    // Function to load entries from localStorage
+    function loadEntries() {
+        const storedEntries = localStorage.getItem('medEntries');
+        if (storedEntries) {
+            medEntries = JSON.parse(storedEntries);
+            renderEntries();
+        }
+    }
+
+    // Function to save entries to localStorage
+    function saveEntries() {
+        localStorage.setItem('medEntries', JSON.stringify(medEntries));
+    }
+
+    // Function to add a new entry to the log
+    function addEntry(medName) {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'p' : 'a';
+        const timeString = `${hours % 12 || 12}:${minutes.toString().padStart(2, '0')}${ampm}`;
+        medEntries.push({ name: medName, time: timeString });
+        saveEntries();
+        renderEntries();
+    }
+
+    // Function to render the entries in the log
+    function renderEntries() {
+        const medLog = document.getElementById('medLog');
+        medLog.innerHTML = ''; // Clear existing entries
+
+        medEntries.forEach((entry, index) => {
+            // Create the logLine div
+            const logLine = document.createElement('div');
+            logLine.classList.add('logLine');
+
+            // Create the elements for name, time, and delete
+            const nameDiv = document.createElement('div');
+            nameDiv.classList.add('medLogName');
+            nameDiv.textContent = entry.name;
+
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('medLogTime');
+            timeDiv.textContent = entry.time;
+
+            const deleteDiv = document.createElement('div');
+            deleteDiv.classList.add('medLogDelete');
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '&#128465;';
+            deleteButton.addEventListener('click', () => {
+                deleteEntry(index);
+            });
+            deleteDiv.appendChild(deleteButton);
+
+            // Append the elements to the logLine div
+            logLine.appendChild(nameDiv);
+            logLine.appendChild(timeDiv);
+            logLine.appendChild(deleteDiv);
+
+            // Append the logLine div to the medLog container
+            medLog.appendChild(logLine);
+        });
+    }
+
+    // Function to delete an entry
+    function deleteEntry(index) {
+        medEntries.splice(index, 1); // Remove the entry from the array
+        saveEntries(); // Update localStorage
+        renderEntries(); // Re-render the table
+    }
+
+    // Event listeners for current medication buttons
+    document.querySelectorAll('.currentMeds button').forEach(button => {
+        button.addEventListener('click', () => {
+            addEntry(button.textContent);
+        });
+    });
+
+    // Event listener for the new entry button
+    const newEntryBtn = document.getElementById('newEntryBtn');
+    const newEntryModal = document.getElementById('newEntryModal');
+    newEntryBtn.addEventListener('click', () => {
+        newEntryModal.style.display = 'block';
+    });
+
+    // Event listener for the close modal button
+    const closeModal = document.getElementById('closeModal');
+    closeModal.addEventListener('click', () => {
+        newEntryModal.style.display = 'none';
+    });
+
+    // Event listener for form submission (to add new meds)
+    const newEntryForm = document.getElementById('newEntryForm').querySelector('form');
+    newEntryForm.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const medName = document.getElementById('medName').value;
+        const medTime = document.getElementById('medTime').value; // Get medTime value
+        const medAmount = document.getElementById('medAmount').value; // Get medAmount value
+
+        // Add logic here to handle adding the new medication to currentMeds
+        const currentMedsDiv = document.querySelector('.currentMeds');
+        const newMedButton = document.createElement('button');
+        newMedButton.textContent = medName; // Use medName for button text
+        newMedButton.id = `med${document.querySelectorAll('.currentMeds button').length + 1}`; // Generate a unique ID
+        currentMedsDiv.appendChild(newMedButton);
+
+        // Add event listener to the newly created button
+        newMedButton.addEventListener('click', () => {
+            addEntry(newMedButton.textContent);
+        });
+
+        // Clear the form fields (optional)
+        newEntryForm.reset();
+    });
+
+    // Load entries on page load
+    loadEntries();
+</script>
+
+</html>
